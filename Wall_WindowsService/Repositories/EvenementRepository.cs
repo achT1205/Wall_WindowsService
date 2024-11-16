@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using System.Data;
 using System.Linq;
 using Wall_WindowsService.Models;
+using System;
 
 namespace Wall_WindowsService.Repositories
 {
@@ -11,7 +12,7 @@ namespace Wall_WindowsService.Repositories
     {
         private readonly string _connectionString;
         private readonly TypologieRepository _typologieRepository;
-        private readonly SiteRepository  _siteRepository;
+        private readonly SiteRepository _siteRepository;
         private readonly ApplicationRepository  _applicationRepository;
 
         public EvenementRepository()
@@ -22,6 +23,59 @@ namespace Wall_WindowsService.Repositories
             _applicationRepository = new ApplicationRepository();
         }
 
+
+        public int[] GetMailIntervals()
+        {
+            List<int> intervales = new List<int>();
+            try
+            {
+                string query = "SELECT [IntervalHourBeforeEvent] FROM [dbo].[MailScheduler]";
+
+                using (SqlConnection con = new SqlConnection(_connectionString))
+                {
+                    using (SqlCommand cmd = new SqlCommand(query, con))
+                    {
+                        con.Open();
+                        cmd.Connection = con;
+                        cmd.CommandText = query;
+                        SqlDataReader reader = cmd.ExecuteReader();
+                        while (reader.Read())
+                        {
+                            if (reader[0] != DBNull.Value)
+                                intervales.Add(reader.GetInt32(0));
+                        }
+                        reader.Close();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+            }
+            return intervales.ToArray();
+        }
+
+
+        public void UpdateGUID(int ID)
+        {
+            string query = "[dbo].[SP_UpdateEvenementGUID]";
+
+            using (SqlConnection con = new SqlConnection(_connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand())
+                {
+                    con.Open();
+
+                    cmd.Connection = con;
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = query;
+                    var prmValeur = new SqlParameter("@ID", SqlDbType.Int);
+                    prmValeur.Value = ID;
+                    cmd.Parameters.Add(prmValeur);
+
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
         public IQueryable<Evenement> GetEvenementsForMailScheduler(string envName, int interval)
         {
             var evenements = new List<Evenement>();

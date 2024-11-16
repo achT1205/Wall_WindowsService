@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Net.Mail;
-using System.Net;
 using System.ServiceProcess;
 using System.Timers;
 using System.IO;
 using System.Collections.Generic;
-using System.Data.SqlClient;
-using System.Management.Instrumentation;
-using System.Configuration;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Data;
 using Wall_WindowsService.Models;
-using System.Xml;
 using HtmlAgilityPack;
 using Wall_WindowsService.Repositories;
 
@@ -21,15 +15,18 @@ namespace Wall_WindowsService
     public partial class EmailService : ServiceBase
     {
         Timer _timer = new Timer();
-        private int[] timeIntervals;
         private string _env = "P3NA - Prod. SI Nucléaire";
-        private int? _envID = 1;
-        private IQueryable<Typologie> _Typologies;
+        private int _envID = 1;
         private readonly EvenementRepository _evenementRepository;
+        private readonly ListeDiffusionRepository _listeDiffusionRepository;
+        private readonly AuditCommRepository _auditCommRepository;
         public EmailService()
         {
             InitializeComponent();
             this.ServiceName = "EmailService";
+            _evenementRepository = new EvenementRepository();
+            _listeDiffusionRepository = new ListeDiffusionRepository();
+            _auditCommRepository = new AuditCommRepository();
         }
 
         protected override void OnStart(string[] args)
@@ -57,7 +54,7 @@ namespace Wall_WindowsService
             try
             {
                 Log("Start sending emails.");
-                var intervals = new List<int>() { 64, 168 };
+                var intervals = _evenementRepository.GetMailIntervals();
                 foreach (var interval in intervals)
                 {
                     var events = _evenementRepository.GetEvenementsForMailScheduler(_env, interval);
@@ -66,30 +63,6 @@ namespace Wall_WindowsService
                         SendEmail(item);
                     }
                 }
-
-
-                //foreach (var eventItem in events)
-                //{
-                //    // Customize the email body with event details
-                //    string emailBody = $"Event: {eventItem.EventName}\nDate: {eventItem.EventDate}";
-
-                //    // Send the email
-                //    using (var client = new SmtpClient("smtp.example.com"))
-                //    {
-                //        client.Port = 587;
-                //        client.Credentials = new NetworkCredential("username", "password");
-                //        client.EnableSsl = true;
-
-                //        var mail = new MailMessage("from@example.com", "to@example.com")
-                //        {
-                //            Subject = $"Upcoming Event: {eventItem.EventName}",
-                //            Body = emailBody
-                //        };
-
-                //        client.Send(mail);
-                //        Log($"Email sent for event {eventItem.EventName}.");
-                //    }
-                //}
                 Log("End sending emails.");
             }
             catch (Exception ex)
@@ -129,76 +102,57 @@ namespace Wall_WindowsService
                 Console.WriteLine($"Failed to log message: {ex.Message}");
             }
         }
-
         public void SendEmail(Evenement evenement)
         {
-            var destinataire = GetListesDiffusionsByEvenement(evenement.ID);
+            var destinataire = _listeDiffusionRepository.GetListesDiffusionsByEvenement(evenement.ID);
             var objet = GetMailObjet(evenement);
             var htmlbody = GetMailTemplate(evenement);
 
-            Log("BEFORE client.Send(message)");
+            Log("BEFORE sending email from Event " + evenement.ID.ToString());
 
-            if (_env != null)
+
+            try
             {
-                int? evID = -1;
-                try
-                {
-                    htmlbody = filterhtml(htmlbody);
-                    SmtpClient client = new SmtpClient("localhost", 25); //SmtpClient("mailhost.der.edf.fr", 25);
+                htmlbody = filterhtml(htmlbody);
+                SmtpClient client = new SmtpClient("localhost", 25); //SmtpClient("mailhost.der.edf.fr", 25);
 
-                    MailAddress from = new MailAddress("wallsdin-noreply@edf.fr");
-                    string[] listdestinataires = destinataire.Split(new Char[] { ',', ';' });
-                    MailMessage message = new MailMessage();
-                    message.From = from;
-                    List<string> mailAddresses = new List<string>();
-                    foreach (string d in listdestinataires)
+                MailAddress from = new MailAddress("wallsdin-noreply@edf.fr");
+                string[] listdestinataires = destinataire.Split(new Char[] { ',', ';' });
+                MailMessage message = new MailMessage();
+                message.From = from;
+                List<string> mailAddresses = new List<string>();
+                foreach (string d in listdestinataires)
+                {
+                    if (d.Contains('@') && !mailAddresses.Contains(d.Trim()))
                     {
-                        if (d.Contains('@') && !mailAddresses.Contains(d.Trim()))
-                        {
-                            mailAddresses.Add(d.Trim());
-                            message.Bcc.Add(new MailAddress(d));
-                        }
+                        mailAddresses.Add(d.Trim());
+                        message.Bcc.Add(new MailAddress(d));
                     }
-
-                    message.Subject = objet;
-                    AlternateView htmlView = LoadImagesIn(htmlbody);
-                    message.AlternateViews.Add(htmlView);
-
-
-                    client.Send(message);
-
-                    //var evenementID = Convert.ToInt32(evenement.ID);
-                    //evID = evenementID;
-                    //htmlbody = htmlbody.Replace("'", "\\'");
-                    Log("AFTER client.Send(message) ==========================================================>");
-
-
-
-
-
-                    //    if (HttpContext != null)
-                    //        insertAuditCom(HttpContext.User.Identity.Name, DateTime.Now, objet, destinataire, evenementID, htmlbody,
-                    //                        "Envoi de mail", "commentaire de l'incident");
-                    //    else
-                    //        insertAuditCom("WALL-SdIN", DateTime.Now, objet, destinataire, evenementID, htmlbody,
-                    //                    "Envoi de mail", "commentaire de l'incident");
-                    //}
-
-
-                    //EvenementRepository rep = new EvenementRepository();
-                    //rep.UpdateGUID(int.Parse(id));
                 }
-                catch (System.Exception excep)
-                {
 
-                }
+                message.Subject = objet;
+                AlternateView htmlView = LoadImagesIn(htmlbody);
+                message.AlternateViews.Add(htmlView);
+
+
+                client.Send(message);
+
+
+                Log("BEFORE sending email from Event " + evenement.ID.ToString());
+
+                htmlbody = htmlbody.Replace("'", "\\'");
+
+
+                _auditCommRepository.InsertAuditComm("WALL-SdIN", DateTime.Now, objet, destinataire, evenement.ID, htmlbody,
+                                "Envoi de mail", "commentaire de l'incident");
+
+                _evenementRepository.UpdateGUID(evenement.ID);
             }
-            else
+            catch (System.Exception excep)
             {
-                //System.Web.Security.FormsAuthentication.SignOut();
-                //return RedirectToAction("Index", "Main");
 
             }
+
         }
 
         private string filterhtml(string htmlbody)
@@ -214,8 +168,6 @@ namespace Wall_WindowsService
             }
             return htmlbody;
         }
-
-
         private AlternateView LoadImagesIn(string htmlbody)
         {
 
@@ -250,44 +202,11 @@ namespace Wall_WindowsService
             return htmlView;
 
         }
-
         public System.IO.Stream LoadImage(string image64)
         {
             byte[] bytes = Convert.FromBase64String(image64);
             MemoryStream ms = new MemoryStream(bytes);
             return ms;
-        }
-
-        public string GetListesDiffusionsByEvenement(int EvenementID)
-        {
-            string liste = "";
-            string diff = "achilletuglo12@gmail.com";//"agnes-externe.victor-bala@edf.fr;Isabelle-externe.maurier@edf.fr, Olivier.bot@edf.fr";
-            liste = diff + " ; " + liste;
-
-            //string query = "[dbo].[SP_GetListesDiffusionsByEvenement]";
-
-            //using (SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["WalleSdinIntranetDb"].ConnectionString))
-            //{
-            //    using (SqlCommand cmd = new SqlCommand(query, con))
-            //    {
-            //        con.Open();
-            //        cmd.Connection = con;
-            //        cmd.CommandType = CommandType.StoredProcedure;
-            //        cmd.CommandText = query;
-            //        var prmEvenementID = new SqlParameter("EvenementID", SqlDbType.Int);
-            //        prmEvenementID.Value = EvenementID;
-            //        cmd.Parameters.Add(prmEvenementID);
-
-            //        SqlDataReader reader = cmd.ExecuteReader();
-
-            //        while (reader.Read())
-            //        {
-            //            string diff = reader.GetString(1);
-            //            liste = diff + " ; " + liste;
-            //        }
-            //    }
-            //}
-            return liste;
         }
         private string GetMailObjet(Evenement evenement)
         {
@@ -324,20 +243,20 @@ namespace Wall_WindowsService
 
             HtmlNode nodeheaderImage = doc.GetElementbyId("headerImage");
             string headerImagepath = "";
-            if (_envID == 1)
-            {
-                headerImagepath = imagesPath + "header_p3na.jpg";
-                byte[] headerImageBytes = System.IO.File.ReadAllBytes(headerImagepath);
-                string srcheader = "data:image/jpeg;base64," + Convert.ToBase64String(headerImageBytes);
-                nodeheaderImage.SetAttributeValue("src", srcheader);
-            }
-            else if (_envID == 3)
-            {
-                headerImagepath = imagesPath + "header_u3na.jpg";
-                byte[] headerImageBytes = System.IO.File.ReadAllBytes(headerImagepath);
-                string srcheader = "data:image/jpeg;base64," + Convert.ToBase64String(headerImageBytes);
-                nodeheaderImage.SetAttributeValue("src", srcheader);
-            }
+            //if (_envID == 1)
+            //{
+            headerImagepath = imagesPath + "header_p3na.jpg";
+            byte[] headerImageBytes = System.IO.File.ReadAllBytes(headerImagepath);
+            string srcheader = "data:image/jpeg;base64," + Convert.ToBase64String(headerImageBytes);
+            nodeheaderImage.SetAttributeValue("src", srcheader);
+            //}
+            //else if (_envID == 3)
+            //{
+            //    headerImagepath = imagesPath + "header_u3na.jpg";
+            //    byte[] headerImageBytes = System.IO.File.ReadAllBytes(headerImagepath);
+            //    string srcheader = "data:image/jpeg;base64," + Convert.ToBase64String(headerImageBytes);
+            //    nodeheaderImage.SetAttributeValue("src", srcheader);
+            //}
 
 
             HtmlNode nodebarreInfo = doc.GetElementbyId("barreInfo");

@@ -68,6 +68,7 @@
       <DependentUpon>EmailService.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\Application.cs" />
+    <Compile Include="Models\AuditCom.cs" />
     <Compile Include="Models\Etat.cs" />
     <Compile Include="Models\Evenement.cs" />
     <Compile Include="Models\Pilote.cs" />
@@ -82,7 +83,9 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ApplicationRepository.cs" />
+    <Compile Include="Repositories\AuditCommRepository.cs" />
     <Compile Include="Repositories\EvenementRepository.cs" />
+    <Compile Include="Repositories\ListeDiffusionRepository.cs" />
     <Compile Include="Repositories\SiteRepository.cs" />
     <Compile Include="Repositories\TypologieRepository.cs" />
   </ItemGroup>
