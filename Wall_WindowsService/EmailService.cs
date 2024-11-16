@@ -14,6 +14,7 @@ using System.Data;
 using Wall_WindowsService.Models;
 using System.Xml;
 using HtmlAgilityPack;
+using Wall_WindowsService.Repositories;
 
 namespace Wall_WindowsService
 {
@@ -24,7 +25,7 @@ namespace Wall_WindowsService
         private string _env = "P3NA - Prod. SI Nucléaire";
         private int? _envID = 1;
         private IQueryable<Typologie> _Typologies;
-
+        private readonly EvenementRepository _evenementRepository;
         public EmailService()
         {
             InitializeComponent();
@@ -59,7 +60,7 @@ namespace Wall_WindowsService
                 var intervals = new List<int>() { 64, 168 };
                 foreach (var interval in intervals)
                 {
-                    var events = GetEvenementsForMailScheduler(_env, interval);
+                    var events = _evenementRepository.GetEvenementsForMailScheduler(_env, interval);
                     foreach (var item in events)
                     {
                         SendEmail(item);
@@ -143,8 +144,8 @@ namespace Wall_WindowsService
                 try
                 {
                     htmlbody = filterhtml(htmlbody);
-                    SmtpClient client = new SmtpClient("localhost", 25); //SmtpClient("mailhost.der.edf.fr");
-                    //client.Port = 25;
+                    SmtpClient client = new SmtpClient("localhost", 25); //SmtpClient("mailhost.der.edf.fr", 25);
+
                     MailAddress from = new MailAddress("wallsdin-noreply@edf.fr");
                     string[] listdestinataires = destinataire.Split(new Char[] { ',', ';' });
                     MailMessage message = new MailMessage();
@@ -163,7 +164,7 @@ namespace Wall_WindowsService
                     AlternateView htmlView = LoadImagesIn(htmlbody);
                     message.AlternateViews.Add(htmlView);
 
- 
+
                     client.Send(message);
 
                     //var evenementID = Convert.ToInt32(evenement.ID);
@@ -499,350 +500,6 @@ namespace Wall_WindowsService
             else if (impact.Contains("[+]")) prio = 2;
             else if (impact.Contains("[]")) prio = 1;
             return prio;
-        }
-
-
-        public IQueryable<Evenement> GetEvenementsForMailScheduler(string envName, int interval)
-        {
-            List<Evenement> evenements = new List<Evenement>();
-            var etat1 = new Etat() { ID = 1, Valeur = "Fermé" };
-            var etat2 = new Etat() { ID = 1, Valeur = "Fermé" };
-            var etat3 = new Etat() { ID = 1, Valeur = "Fermé" };
-
-            var pilote = new Pilote() { ID = 1, Valeur = "Pilote" };
-            var typology = new Typologie() { ID = 1, Nomcourt = "", Type_SIVISION = "", TypologieNom = "" };
-
-
-            List<Evenement> Evenements = new List<Evenement>
-            {
-                new Evenement
-                {
-                    ID = 30167,
-                    DateDebut = DateTime.Parse("2022-06-08 12:00:00"),
-                    DateFin = DateTime.Parse("2022-06-08 12:25:00"),
-                    DateFermeture = DateTime.Parse("2022-06-08 12:32:17.597"),
-                    Libelle = "Opération de maintenance",
-                    Impact = "[++] Indisponibilité de l'application",
-                    EnvID = 1,
-                    PiloteID = 2,
-                    Pilote = pilote,
-                    EtatID = 3,
-                    Etat = etat1,
-                    Description = "L'opération technique sur l'application FORQUART, prévue le 08/06/2022 de 12h00 à 14h00 est terminée. L'application est de nouveau pleinement disponible.",
-                    DateCreation = DateTime.Parse("2022-06-03 15:21:21.267"),
-                    DateModification = DateTime.Parse("2022-06-08 12:32:34.150"),
-                    Typologie = getTypologieByID(2),
-                    GestionInterne = false,
-                    Sites =  GetSitesByEvent(30167),
-                    Applications = GetApplicationsByEvent(30167)
-                },
-                 new Evenement
-                {
-                    ID = 30167,
-                    DateDebut = DateTime.Parse("2022-06-08 12:00:00"),
-                    DateFin = DateTime.Parse("2022-06-08 12:25:00"),
-                    DateFermeture = DateTime.Parse("2022-06-08 12:32:17.597"),
-                    Libelle = "Opération de maintenance",
-                    Impact = "[++] Indisponibilité de l'application",
-                    EnvID = 1,
-                    PiloteID = 2,
-                    Pilote = pilote,
-                    EtatID = 3,
-                    Etat = etat1,
-                    Description = "L'opération technique sur l'application FORQUART, prévue le 08/06/2022 de 12h00 à 14h00 est terminée. L'application est de nouveau pleinement disponible.",
-                    DateCreation = DateTime.Parse("2022-06-03 15:21:21.267"),
-                    DateModification = DateTime.Parse("2022-06-08 12:32:34.150"),
-                    Typologie = getTypologieByID(1),
-                    GestionInterne = false,
-                    Sites =  GetSitesByEvent(30167),
-                    Applications = GetApplicationsByEvent(30167)
-                }
-            };
-            //string query = "[dbo].[sp_GetEvenementsForMailScheduler]";
-
-            //using (SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["WalleSdinIntranetDb"].ConnectionString))
-            //{
-            //    using (SqlCommand cmd = new SqlCommand(query, con))
-            //    {
-            //        con.Open();
-            //        cmd.Connection = con;
-            //        cmd.CommandType = CommandType.StoredProcedure;
-            //        cmd.CommandText = query;
-
-            //        var prmEnvName = new SqlParameter("EnvName", SqlDbType.NVarChar, 100);
-            //        prmEnvName.Value = envName;
-            //        cmd.Parameters.Add(prmEnvName);
-            //        cmd.Parameters.Add("IntervalHours", SqlDbType.Int).Value = interval;
-
-            //        SqlDataReader reader = cmd.ExecuteReader();
-
-            //        while (reader.Read())
-            //        {
-            //            Evenement evenement = new Evenement();
-            //            evenement.Etat = new Etat();
-
-            //            evenement.Pilote = new Pilote();
-
-            //            evenement.ID = reader.GetInt32(0);
-            //            evenement.DateDebut = reader.GetDateTime(1);
-            //            evenement.DateFin = reader.GetDateTime(2);
-            //            evenement.Libelle = reader.GetString(4);
-            //            evenement.PiloteID = reader.GetInt32(10);
-            //            evenement.Pilote.ID = evenement.PiloteID;
-            //            evenement.Pilote.Valeur = reader.GetString(11);
-            //            evenement.EtatID = reader.GetInt32(12);
-            //            evenement.Etat.ID = evenement.EtatID;
-            //            evenement.Etat.Valeur = reader.GetString(13);
-            //            evenement.Description = (reader.IsDBNull(14)) ? null : reader.GetString(14);
-            //            evenement.DateCreation = reader.GetDateTime(15);
-            //            evenement.DateModification = reader.GetDateTime(16);
-
-            //            if (!reader.IsDBNull(18)) evenement.Typologie = getTypologieByID(reader.GetInt32(18));
-            //            else evenement.Typologie = null;
-
-            //            evenement.Sites = GetSitesByEvent(evenement.ID);
-            //            evenement.Applications = GetApplicationsByEvent(evenement.ID);
-            //            evenement.GestionInterne = (reader.IsDBNull(20)) ? null : (bool?)reader.GetBoolean(20);
-            //            evenements.Add(evenement);
-            //        }
-            //    }
-            //}
-            //return evenements.AsQueryable();
-
-            return Evenements.AsQueryable();
-        }
-
-        private Typologie getTypologieByID(int? typoID)
-        {
-            if (typoID != null)
-            {
-                if (_Typologies == null) _Typologies = GetTypologies();
-                if (_Typologies != null) return _Typologies.Where(t => t.ID == typoID).First();
-                else return null;
-            }
-            else return null;
-        }
-
-        public IQueryable<Typologie> GetTypologies()
-        {
-            //List<Typologie> typos = new List<Typologie>();
-            //string query = "[dbo].[SP_GetTypologies]";
-
-            //using (SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["WalleSdinIntranetDb"].ConnectionString))
-            //{
-            //    using (SqlCommand cmd = new SqlCommand(query, con))
-            //    {
-            //        con.Open();
-            //        cmd.Connection = con;
-            //        cmd.CommandType = CommandType.StoredProcedure;
-            //        cmd.CommandText = query;
-
-            //        SqlDataReader reader = cmd.ExecuteReader();
-
-            //        while (reader.Read())
-            //        {
-            //            Typologie typo = new Typologie();
-            //            typo.ID = reader.GetInt32(0);
-            //            typo.TypologieNom = reader.GetString(1);
-            //            typo.Nomcourt = reader.GetString(2);
-            //            if (reader["Type_SIVISION"] != DBNull.Value)
-            //                typo.Type_SIVISION = reader.GetString(3);
-            //            typos.Add(typo);
-            //        }
-            //    }
-            //}
-            //return typos.AsQueryable();
-
-            List<Typologie> Typologies = new List<Typologie>
-            {
-                new Typologie
-                {
-                    ID = 1,
-                    TypologieNom = "Applicatif",
-                    Nomcourt = "Appli",
-                    Type_SIVISION = "Changement fonctionnel"
-                },
-                new Typologie
-                {
-                    ID = 2,
-                    TypologieNom = "Infrastructure",
-                    Nomcourt = "Infra",
-                    Type_SIVISION = "Changement infrastructure"
-                },
-                new Typologie
-                {
-                    ID = 3,
-                    TypologieNom = "Réseau",
-                    Nomcourt = "Réseau",
-                    Type_SIVISION = "Changement technique"
-                },
-                new Typologie
-                {
-                    ID = 4,
-                    TypologieNom = "Stockage",
-                    Nomcourt = "Stockage",
-                    Type_SIVISION = "Changement technique"
-                },
-                new Typologie
-                {
-                    ID = 5,
-                    TypologieNom = "Flux",
-                    Nomcourt = "Flux",
-                    Type_SIVISION = "Changement technique"
-                },
-                new Typologie
-                {
-                    ID = 6,
-                    TypologieNom = "Divers",
-                    Nomcourt = "Divers",
-                    Type_SIVISION = null
-                }
-            };
-
-            return Typologies.AsQueryable();
-
-        }
-
-
-        public List<Site> GetSitesByEvent(int EvenementID)
-        {
-            //List<Site> sites = new List<Site>();
-            //string query = "[dbo].[SP_GetSitesByEvenement]";
-
-            //using (SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["WalleSdinIntranetDb"].ConnectionString))
-            //{
-            //    using (SqlCommand cmd = new SqlCommand(query, con))
-            //    {
-            //        con.Open();
-            //        cmd.Connection = con;
-            //        cmd.CommandType = CommandType.StoredProcedure;
-            //        cmd.CommandText = query;
-            //        var prmEnvID = new SqlParameter("EvenementID", SqlDbType.Int);
-            //        prmEnvID.Value = EvenementID;
-            //        cmd.Parameters.Add(prmEnvID);
-            //        SqlDataReader reader = cmd.ExecuteReader();
-
-            //        while (reader.Read())
-            //        {
-            //            Site site = new Site();
-            //            site.ID = reader.GetInt32(0);
-            //            site.SiteName = reader.GetString(1);
-            //            site.NomCourt = reader.GetString(2);
-            //            site.Direction = reader.GetString(3);
-            //            sites.Add(site);
-            //        }
-            //    }
-            //}
-            //return sites;
-
-            List<Site> Sites = new List<Site>
-            {
-                new Site
-                {
-                    ID = 34,
-                    SiteName = "Tous les sites",
-                    NomCourt = "Tous",
-                    Direction = "Tous"
-                },
-                new Site
-                {
-                    ID = 1,
-                    SiteName = "Belleville",
-                    NomCourt = "BEL",
-                    Direction = "CNPE"
-                },
-                new Site
-                {
-                    ID = 2,
-                    SiteName = "Blayais",
-                    NomCourt = "BLA",
-                    Direction = "CNPE"
-                },
-                new Site
-                {
-                    ID = 22,
-                    SiteName = "Brennillis",
-                    NomCourt = "BRE",
-                    Direction = "CNPE"
-                },
-                new Site
-                {
-                    ID = 17,
-                    SiteName = "Penly",
-                    NomCourt = "PEN",
-                    Direction = "CNPE"
-                },
-                new Site
-                {
-                    ID = 13,
-                    SiteName = "Golfech",
-                    NomCourt = "GOL",
-                    Direction = "CNPE"
-                },
-                new Site
-                {
-                    ID = 12,
-                    SiteName = "Flamanville 3",
-                    NomCourt = "FA3",
-                    Direction = "CNPE"
-                }
-            };
-
-            return Sites;
-        }
-
-
-        public List<Application> GetApplicationsByEvent(int EvenementID)
-        {
-            //List<Application> applications = new List<Application>();
-
-            List<Application> Applications = new List<Application>
-        {
-            new Application { ID = 1, ApplicationName = "EAM", Entite = "SI rénové", NNI = "EAM", EstActif = true },
-            new Application { ID = 4, ApplicationName = "BI", Entite = "SI rénové", NNI = "INF", EstActif = true },
-            new Application { ID = 6, ApplicationName = "MRS", Entite = "SI rénové", NNI = "MRS", EstActif = true },
-            new Application { ID = 7, ApplicationName = "GPS", Entite = "SI rénové", NNI = "GPS", EstActif = true },
-            new Application { ID = 9, ApplicationName = "GMO2", Entite = "SI rénové", NNI = "GM2", EstActif = true },
-            new Application { ID = 12, ApplicationName = "Micado 5", Entite = "SI rénové", NNI = "MCO", EstActif = true },
-            new Application { ID = 13, ApplicationName = "DOSIAP", Entite = "SI rénové", NNI = "DSA", EstActif = true },
-            new Application { ID = 16, ApplicationName = "Epsilon 2", Entite = "SI rénové", NNI = "EPS", EstActif = true },
-            new Application { ID = 17, ApplicationName = "AP913", Entite = "SI rénové", NNI = "AP9", EstActif = true },
-            new Application { ID = 20, ApplicationName = "Espace", Entite = "SI existant", NNI = "BLC", EstActif = true },
-            new Application { ID = 21, ApplicationName = "Merlin", Entite = "SI existant", NNI = "MLN", EstActif = true },
-            new Application { ID = 22, ApplicationName = "Cahier de Quart", Entite = "SI existant", NNI = "CDQ", EstActif = true },
-            new Application { ID = 23, ApplicationName = "PDME", Entite = "SI existant", NNI = "old", EstActif = true },
-            new Application { ID = 24, ApplicationName = "AIC", Entite = "SI existant", NNI = "AIC", EstActif = true }
-        };
-            //string query = "[dbo].[SP_GetApplicationsByEvenement]";
-
-            //using (SqlConnection con = new SqlConnection(ConfigurationManager.ConnectionStrings["WalleSdinIntranetDb"].ConnectionString))
-            //{
-            //    using (SqlCommand cmd = new SqlCommand(query, con))
-            //    {
-            //        con.Open();
-            //        cmd.Connection = con;
-            //        cmd.CommandType = CommandType.StoredProcedure;
-            //        cmd.CommandText = query;
-            //        var prmEnvID = new SqlParameter("EvenementID", SqlDbType.Int);
-            //        prmEnvID.Value = EvenementID;
-            //        cmd.Parameters.Add(prmEnvID);
-            //        SqlDataReader reader = cmd.ExecuteReader();
-
-            //        while (reader.Read())
-            //        {
-            //            Application appli = new Application();
-            //            appli.ID = reader.GetInt32(0);
-            //            appli.ApplicationName = reader.GetString(1);
-            //            appli.Entite = reader.GetString(2);
-            //            appli.NNI = reader.GetString(3);
-            //            appli.EstActif = reader.GetBoolean(4);
-            //            applications.Add(appli);
-            //        }
-            //    }
-            //}
-            //return applications;
-
-            return Applications;
         }
     }
 }

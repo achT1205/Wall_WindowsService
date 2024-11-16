@@ -5,12 +5,9 @@ namespace Wall_WindowsService.Models
 {
     public class Evenement
     {
-        public int EventId { get; set; }
-        public string EventName { get; set; }
-        public DateTime EventDate { get; set; }
         public List<Application> Applications { get; set; }
         public List<Site> Sites { get; set; }
-        public Etat Etat { get;  set; }
+        public virtual Etat Etat { get;  set; }
         public string Libelle { get;  set; }
         public int CriticiteMax { get;  set; }
         public DateTime DateDebut { get; set; }
@@ -25,8 +22,6 @@ namespace Wall_WindowsService.Models
         public DateTime DateCreation { get; internal set; }
         public DateTime DateModification { get; internal set; }
         public bool? GestionInterne { get; internal set; }
-        public DateTime DateFermeture { get; internal set; }
         public string Impact { get; internal set; }
-        public int EnvID { get; internal set; }
     }
 }

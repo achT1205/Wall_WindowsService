@@ -1,0 +1,3 @@
+docker run -d -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Str0ngPa$$w0rd" --name edf-server -p 1435:1433 -d mcr.microsoft.com/azure-sql-edge:latest
+
+
