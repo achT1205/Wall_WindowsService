@@ -7,7 +7,7 @@ namespace Wall_WindowsService.Models
 
         public string NNI { get; set; }
 
-        public Nullable<DateTime> DateEnvoi { get; set; }
+        public DateTime? DateEnvoi { get; set; }
 
         public string Objet { get; set; }
 
@@ -15,9 +15,9 @@ namespace Wall_WindowsService.Models
 
         public string Contenu { get; set; }
 
-        public Nullable<int> IdEvenement { get; set; }
+        public int ? IdEvenement { get; set; }
 
-        public Nullable<int> IdIncident { get; set; }
+        public int? IdIncident { get; set; }
         public string Type { get; set; }
 
         public string Commentaire { get; set; }

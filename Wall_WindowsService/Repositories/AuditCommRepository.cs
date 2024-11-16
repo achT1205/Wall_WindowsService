@@ -75,8 +75,14 @@ namespace Wall_WindowsService.Repositories
                     }
                 }
             }
-            catch (Exception e)
-            { }
+            catch (Exception ex)
+            {
+
+                Logging.Log("ERROR in InsertAuditComm " + ex.Message);
+
+                throw ex;
+
+            }
 
         }
 

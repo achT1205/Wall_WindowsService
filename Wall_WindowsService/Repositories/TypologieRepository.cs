@@ -23,30 +23,41 @@ namespace Wall_WindowsService.Repositories
 
             string query = "[dbo].[SP_GetTypologies]";
 
-            using (SqlConnection con = new SqlConnection(_connectionString))
+            try
             {
-                using (SqlCommand cmd = new SqlCommand(query, con))
+                using (SqlConnection con = new SqlConnection(_connectionString))
                 {
-                    con.Open();
-                    cmd.Connection = con;
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandText = query;
-
-                    SqlDataReader reader = cmd.ExecuteReader();
-
-                    while (reader.Read())
+                    using (SqlCommand cmd = new SqlCommand(query, con))
                     {
-                        Typologie typo = new Typologie();
-                        typo.ID = reader.GetInt32(0);
-                        typo.TypologieNom = reader.GetString(1);
-                        typo.Nomcourt = reader.GetString(2);
-                        if (reader["Type_SIVISION"] != DBNull.Value)
-                            typo.Type_SIVISION = reader.GetString(3);
-                        typos.Add(typo);
+                        con.Open();
+                        cmd.Connection = con;
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.CommandText = query;
+
+                        SqlDataReader reader = cmd.ExecuteReader();
+
+                        while (reader.Read())
+                        {
+                            Typologie typo = new Typologie();
+                            typo.ID = reader.GetInt32(0);
+                            typo.TypologieNom = reader.GetString(1);
+                            typo.Nomcourt = reader.GetString(2);
+                            if (reader["Type_SIVISION"] != DBNull.Value)
+                                typo.Type_SIVISION = reader.GetString(3);
+                            typos.Add(typo);
+                        }
                     }
                 }
+                return typos.AsQueryable();
             }
-            return typos.AsQueryable();
+            catch (Exception ex)
+            {
+
+                Logging.Log("ERROR in GetTypologies " + ex.Message);
+
+                throw ex;
+
+            }
         }
 
 

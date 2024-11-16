@@ -23,5 +23,10 @@ namespace Wall_WindowsService.Models
         public DateTime DateModification { get; internal set; }
         public bool? GestionInterne { get; internal set; }
         public string Impact { get; internal set; }
+        public DateTime? DateFermeture { get; internal set; }
+        public int EnvID { get; internal set; }
+        public Environnement Environnement { get; internal set; }
+        public int PorteurID { get; internal set; }
+        public Porteur Porteur { get; internal set; }
     }
 }

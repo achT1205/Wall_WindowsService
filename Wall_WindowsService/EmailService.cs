@@ -31,9 +31,9 @@ namespace Wall_WindowsService
 
         protected override void OnStart(string[] args)
         {
-            Log("Service started at " + DateTime.Now);
+            Logging.Log("Service started at " + DateTime.Now);
             _timer.Elapsed += new ElapsedEventHandler(TimerElapsed);
-            _timer.Interval = 10000;
+            _timer.Interval = 20000;
             _timer.Enabled = true;
             _timer.Start();
         }
@@ -46,69 +46,47 @@ namespace Wall_WindowsService
 
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
-            Log("Timer triggered.");
+            Logging.Log("Timer triggered.");
             SendEmails();
         }
         private void SendEmails()
         {
             try
             {
-                Log("Start sending emails.");
+                Logging.Log("START sending emails.");
                 var intervals = _evenementRepository.GetMailIntervals();
                 foreach (var interval in intervals)
                 {
                     var events = _evenementRepository.GetEvenementsForMailScheduler(_env, interval);
+
+                    Logging.Log("Total evets found : ==>" + events.Count());
+
                     foreach (var item in events)
                     {
+                        Logging.Log("START Traitement for Event : ==>" + item.ID);
+
                         SendEmail(item);
+
+                        Logging.Log("END Traitement for Event : ==>" + item.ID);
+
                     }
                 }
-                Log("End sending emails.");
+                Logging.Log("START sending emails.");
             }
             catch (Exception ex)
             {
-                Log($"Error sending emails: {ex.Message}");
+                Logging.Log($"Error sending emails: {ex.Message}");
             }
         }
 
 
-        private void Log(string message)
-        {
-            try
-            {
-                string path = AppDomain.CurrentDomain.BaseDirectory + "\\Logs";
-                if (!Directory.Exists(path))
-                {
-                    Directory.CreateDirectory(path);
-                }
-                string filePah = AppDomain.CurrentDomain.BaseDirectory + "\\Logs\\EmailServiceLog_" + DateTime.Now.Date.ToShortDateString().Replace('/', '_') + ".txt";
-                if (!File.Exists(filePah))
-                {
-                    using (StreamWriter sw = new StreamWriter(filePah))
-                    {
-                        sw.WriteLine($"{DateTime.Now}: {message}");
-                    }
-                }
-                else
-                {
-                    using (StreamWriter sw = File.AppendText(filePah))
-                    {
-                        sw.WriteLine($"{DateTime.Now}: {message}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Failed to log message: {ex.Message}");
-            }
-        }
+       
         public void SendEmail(Evenement evenement)
         {
             var destinataire = _listeDiffusionRepository.GetListesDiffusionsByEvenement(evenement.ID);
             var objet = GetMailObjet(evenement);
             var htmlbody = GetMailTemplate(evenement);
-
-            Log("BEFORE sending email from Event " + evenement.ID.ToString());
+            Logging.Log("BEFORE sending email from Event " + evenement.ID.ToString());
 
 
             try
@@ -138,7 +116,7 @@ namespace Wall_WindowsService
                 client.Send(message);
 
 
-                Log("BEFORE sending email from Event " + evenement.ID.ToString());
+                Logging.Log("BEFORE sending email from Event " + evenement.ID.ToString());
 
                 htmlbody = htmlbody.Replace("'", "\\'");
 
