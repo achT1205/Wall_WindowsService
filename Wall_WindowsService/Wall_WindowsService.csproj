@@ -87,6 +87,12 @@
   <ItemGroup>
     <None Include="App.config" />
     <None Include="App_dev.config" />
+    <None Include="Deploy\Install.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Deploy\Uninstall.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -95,10 +101,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="infra\1-db.sql" />
-    <Content Include="infra\0-docker_commads.txt" />
-    <Content Include="infra\2-insert_data.sql" />
-    <Content Include="infra\3-ps.sql" />
+    <Content Include="Infra\1-db.sql" />
+    <Content Include="Infra\0-docker_commads.txt" />
+    <Content Include="Infra\2-insert_data.sql" />
+    <Content Include="Infra\3-ps.sql" />
     <Content Include="Resources\images\email_template\barre-info-op-imp.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

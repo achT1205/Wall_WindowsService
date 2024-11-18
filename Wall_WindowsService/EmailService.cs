@@ -54,6 +54,7 @@ namespace Wall_WindowsService
         {
             try
             {
+                Logging.Log("");
                 Logging.Log("START emails process.");
                 var intervals = _evenementRepository.GetMailIntervals();
 
@@ -68,13 +69,14 @@ namespace Wall_WindowsService
 
                     foreach (var item in events)
                     {
-                        Logging.Log("START Traitement for Event : ==> : " + item.ID);
+                        Logging.Log("");
+                        Logging.Log($"START Traitement for Event, ID={item.ID}, Libelle={item.Libelle}");
 
                         SendEmail(item);
                         count++;
 
-                        Logging.Log("END Traitement for Event : ==> : " + item.ID);
-
+                        Logging.Log($"END Traitement for Event, ID={item.ID}, Libelle={item.Libelle}");
+                        Logging.Log("");
                     }
                 }
                 Logging.Log($"END emails process, {count} emails sent in total.");
