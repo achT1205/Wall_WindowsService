@@ -20,22 +20,22 @@ function Delete-ExistingService {
     }
 }
 
-Delete-ExistingService 
+Delete-ExistingService
 $trial = 2
 while((Get-Service $serviceName -ErrorAction SilentlyContinue) -and  $trial -gt 0)
 {   $emailService = Get-Service -Name $serviceName
     Write-Host 'The Service still exists after deletion process. Status:' + $emailService.status
-    
+   
     $trial--
     Write-Host "Try to delete the " + (3 - $trial) + " time"
     Delete-ExistingService
-    
+   
 }
 
 
 if (Get-Service $serviceName -ErrorAction SilentlyContinue){
     Write-Host "Can not delete the existing service after 3 trials"
-    Write-Host "Aborting the installation" 
+    Write-Host "Aborting the installation"
 }else {
     "Uninstallation completed"
 }

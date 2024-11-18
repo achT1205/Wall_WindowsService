@@ -42,9 +42,7 @@ namespace Wall_WindowsService.Repositories
                         }
                     }
                 }
-                //return liste;
-                return "komla-melowo-externe.tuglo@edf.fr;achilletuglo12@gmail.com";
-
+                return liste;
             }
             catch (Exception ex)
             {

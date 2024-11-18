@@ -23,15 +23,12 @@ function Delete-ExistingService {
 }
 
 function Install-NewService {
-    
+   
     Write-Host "installing service"
 
-    $secpasswd = ConvertTo-SecureString $Password -AsPlainText -Force
-    #$mycreds = New-Object System.Management.Automation.PSCredential ($Loggin, $secpasswd) 
 
-
-    $binaryPath = "C:\Users\achil\source\repos\Wall_WindowsService\Wall_WindowsService\bin\Debug\Wall_WindowsService.exe"
-    New-Service -name $serviceName -binaryPathName $binaryPath -displayName $displayName -description $description -startupType Automatic -credential #$mycreds
+    $binaryPath = "D:\EDF WALL-E\WALLSDIN_WINDOWS_SERVICE\Wall_WindowsService.exe"
+    New-Service -name $serviceName -binaryPathName $binaryPath -displayName $displayName -description $description -startupType Automatic
 
     Write-Host "installation completed"
     Start-Sleep -seconds 2
@@ -53,14 +50,14 @@ function Install-NewService {
 
 
 
-Delete-ExistingService 
+Delete-ExistingService
 $trial = 2
 while((Get-Service $serviceName -ErrorAction SilentlyContinue) -and  $trial -gt 0)
-{   
+{  
     Start-Sleep -seconds 2
     $emailService = Get-Service -Name $serviceName
     Write-Host 'The Service still exists after deletion process. Status:' + $emailService.status
-    
+   
     $trial--
     Write-Host "Try to delete the " + (3 - $trial) + " time"
     Delete-ExistingService
@@ -68,7 +65,7 @@ while((Get-Service $serviceName -ErrorAction SilentlyContinue) -and  $trial -gt 
 
 if (Get-Service $serviceName -ErrorAction SilentlyContinue){
     Write-Host "Can not delete the existing service after 3 trials"
-    Write-Host "Aborting the installation" 
+    Write-Host "Aborting the installation"
 }else {
     Install-NewService
 }
