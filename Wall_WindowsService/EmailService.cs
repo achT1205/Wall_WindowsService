@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using Wall_WindowsService.Models;
 using HtmlAgilityPack;
 using Wall_WindowsService.Repositories;
+using System.Management.Instrumentation;
 
 namespace Wall_WindowsService
 {
@@ -33,7 +34,7 @@ namespace Wall_WindowsService
         {
             Logging.Log("Service started at " + DateTime.Now);
             _timer.Elapsed += new ElapsedEventHandler(TimerElapsed);
-            _timer.Interval = 20000;
+            _timer.Interval = 60 * 1000; // Wait for 1 minute
             _timer.Enabled = true;
             _timer.Start();
         }
@@ -54,25 +55,30 @@ namespace Wall_WindowsService
         {
             try
             {
-                Logging.Log("START sending emails.");
+                Logging.Log("START emails process.");
                 var intervals = _evenementRepository.GetMailIntervals();
+
+                Logging.Log("Total intervals found : ==> : " + intervals.Count());
+                int count = 0;
                 foreach (var interval in intervals)
                 {
+                    Logging.Log($"Getting potemtial events for the period  {interval} hours: ==> : ");
                     var events = _evenementRepository.GetEvenementsForMailScheduler(_env, interval);
 
-                    Logging.Log("Total evets found : ==>" + events.Count());
+                    Logging.Log($"{events.Count()} events found for the period  {interval} hours:");
 
                     foreach (var item in events)
                     {
-                        Logging.Log("START Traitement for Event : ==>" + item.ID);
+                        Logging.Log("START Traitement for Event : ==> : " + item.ID);
 
                         SendEmail(item);
+                        count++;
 
-                        Logging.Log("END Traitement for Event : ==>" + item.ID);
+                        Logging.Log("END Traitement for Event : ==> : " + item.ID);
 
                     }
                 }
-                Logging.Log("START sending emails.");
+                Logging.Log($"END emails process, {count} emails sent in total.");
             }
             catch (Exception ex)
             {
