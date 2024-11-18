@@ -48,7 +48,7 @@ namespace Wall_WindowsService
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
             Logging.Log("Timer triggered.");
-            //SendEmails();
+            SendEmails();
         }
         private void SendEmails()
         {
@@ -90,7 +90,7 @@ namespace Wall_WindowsService
             try
             {
                 htmlbody = filterhtml(htmlbody);
-                SmtpClient client = new SmtpClient("localhost", 25); //SmtpClient("mailhost.der.edf.fr", 25);
+                SmtpClient client = new SmtpClient("mailhost.der.edf.fr", 25); //SmtpClient("localhost", 25); //
 
                 MailAddress from = new MailAddress("wallsdin-noreply@edf.fr");
                 string[] listdestinataires = destinataire.Split(new Char[] { ',', ';' });
