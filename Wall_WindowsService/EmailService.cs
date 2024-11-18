@@ -42,12 +42,13 @@ namespace Wall_WindowsService
         {
             _timer.Stop();
             _timer.Dispose();
+            Logging.Log("Service stoped at " + DateTime.Now);
         }
 
         private void TimerElapsed(object sender, ElapsedEventArgs e)
         {
             Logging.Log("Timer triggered.");
-            SendEmails();
+            //SendEmails();
         }
         private void SendEmails()
         {
@@ -78,9 +79,6 @@ namespace Wall_WindowsService
                 Logging.Log($"Error sending emails: {ex.Message}");
             }
         }
-
-
-       
         public void SendEmail(Evenement evenement)
         {
             var destinataire = _listeDiffusionRepository.GetListesDiffusionsByEvenement(evenement.ID);
