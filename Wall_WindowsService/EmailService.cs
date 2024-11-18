@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using Wall_WindowsService.Models;
 using HtmlAgilityPack;
 using Wall_WindowsService.Repositories;
-using System.Management.Instrumentation;
 
 namespace Wall_WindowsService
 {
@@ -90,7 +89,7 @@ namespace Wall_WindowsService
             var destinataire = _listeDiffusionRepository.GetListesDiffusionsByEvenement(evenement.ID);
             var objet = GetMailObjet(evenement);
             var htmlbody = GetMailTemplate(evenement);
-            Logging.Log("BEFORE sending email from Event " + evenement.ID.ToString());
+            Logging.Log("BEFORE sending email for Event " + evenement.ID.ToString());
 
 
             try
@@ -120,18 +119,29 @@ namespace Wall_WindowsService
                 client.Send(message);
 
 
-                Logging.Log("BEFORE sending email from Event " + evenement.ID.ToString());
+                Logging.Log("AFTER sending email for Event " + evenement.ID.ToString());
 
                 htmlbody = htmlbody.Replace("'", "\\'");
 
+                Logging.Log("START insertting audit line for" + evenement.ID.ToString());
 
-                _auditCommRepository.InsertAuditComm("WALL-SdIN", DateTime.Now, objet, destinataire, evenement.ID, htmlbody,
-                                "Envoi de mail", "commentaire de l'incident");
+                _auditCommRepository.InsertAuditComm("WALL-SdIN", DateTime.Now, objet, destinataire, evenement.ID, htmlbody, "Envoi de mail", "commentaire de l'incident");
+
+                Logging.Log("END insertting audit line for" + evenement.ID.ToString());
+
+                Logging.Log("START Updating GUID audit line for" + evenement.ID.ToString());
 
                 _evenementRepository.UpdateGUID(evenement.ID);
+
+                Logging.Log("END Updating GUID audit line for" + evenement.ID.ToString());
+
             }
-            catch (System.Exception excep)
+            catch (Exception ex)
             {
+
+                Logging.Log("ERROR in SendEmail " + ex.Message);
+
+                throw ex;
 
             }
 
