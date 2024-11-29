@@ -81,6 +81,9 @@ CREATE TABLE Evenement (
     DateCreation DATETIME NOT NULL DEFAULT GETDATE(), -- Creation date
     DateModification DATETIME NOT NULL DEFAULT GETDATE(), -- Last modification date
     GestionInterne BIT NULL,                  -- Internal management flag (Nullable)
+    [CriticiteMax] [smallint] NULL,
+    [GUID] [uniqueidentifier] NULL,
+    [idMessageLinked] [uniqueidentifier] NOT NULL,
 
     -- Foreign Key Constraints
     CONSTRAINT FK_Evenement_Environnement FOREIGN KEY (EnvID) REFERENCES Environnement(ID),

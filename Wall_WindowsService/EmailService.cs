@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using Wall_WindowsService.Models;
 using HtmlAgilityPack;
 using Wall_WindowsService.Repositories;
+using System.Configuration;
 
 namespace Wall_WindowsService
 {
@@ -20,6 +21,17 @@ namespace Wall_WindowsService
         private readonly EvenementRepository _evenementRepository;
         private readonly ListeDiffusionRepository _listeDiffusionRepository;
         private readonly AuditCommRepository _auditCommRepository;
+
+        // Retrieve SMTP settings
+        string smtpHost = ConfigurationManager.AppSettings["SmtpHost"];
+        int smtpPort = int.Parse(ConfigurationManager.AppSettings["SmtpPort"]);
+
+        // Retrieve interval setting
+        int interval = int.Parse(ConfigurationManager.AppSettings["Interval"]);
+
+        // Retrieve Sender
+        string emailSender = ConfigurationManager.AppSettings["EmailSender"];
+
         public EmailService()
         {
             InitializeComponent();
@@ -33,7 +45,7 @@ namespace Wall_WindowsService
         {
             Logging.Log("Service started at " + DateTime.Now);
             _timer.Elapsed += new ElapsedEventHandler(TimerElapsed);
-            _timer.Interval = 60 * 1000; // Wait for 1 minute
+            _timer.Interval = interval;
             _timer.Enabled = true;
             _timer.Start();
         }
@@ -97,9 +109,10 @@ namespace Wall_WindowsService
             try
             {
                 htmlbody = filterhtml(htmlbody);
-                SmtpClient client = new SmtpClient("mailhost.der.edf.fr", 25); //SmtpClient("localhost", 25); //
 
-                MailAddress from = new MailAddress("wallsdin-noreply@edf.fr");
+                SmtpClient client = new SmtpClient(smtpHost, smtpPort);
+
+                MailAddress from = new MailAddress(emailSender);
                 string[] listdestinataires = destinataire.Split(new Char[] { ',', ';' });
                 MailMessage message = new MailMessage();
                 message.From = from;
@@ -224,8 +237,21 @@ namespace Wall_WindowsService
             return "[Opération planifiée - " + evenement.Etat.Valeur + "] " + labelApplications + " - " + labelSites + " - " + evenement.Libelle;
 
         }
+
+        private void GetImpactforEvent(Evenement evenement)
+        {
+            string impacts = evenement.Impact;
+
+            List<string> list = new List<string>(
+                                       impacts.Split(new string[] { "\r\n" },
+                                       StringSplitOptions.RemoveEmptyEntries));
+
+            evenement.ListImpacts = list;
+
+        }
         public string GetMailTemplate(Evenement evenement)
         {
+            GetImpactforEvent(evenement);
             string pathtemplate, imagesPath;
 
             pathtemplate = AppDomain.CurrentDomain.BaseDirectory + "/Resources/MailGmailUtf8Data.html";

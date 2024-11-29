@@ -47,7 +47,7 @@ namespace Wall_WindowsService.Repositories
             catch (Exception ex)
             {
 
-                Logging.Log("ERROR in InsertAuditComm " + ex.Message);
+                Logging.Log("ERROR in GetListesDiffusionsByEvenement " + ex.Message);
 
                 throw ex;
 

@@ -152,6 +152,7 @@ namespace Wall_WindowsService.Repositories
                             evenement.Sites = _siteRepository.GetSitesByEvent(evenement.ID);
                             evenement.Applications = _applicationRepository.GetApplicationsByEvent(evenement.ID);
                             evenement.GestionInterne = (reader.IsDBNull(20)) ? null : (bool?)reader.GetBoolean(20);
+                            evenement.CriticiteMax = reader.GetInt16(21);
 
                             evenements.Add(evenement);
                         }

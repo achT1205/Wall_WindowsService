@@ -36,15 +36,15 @@ GO
 -- Insert into Application Table
 INSERT INTO Application (ApplicationName, Entite, NNI, EstActif)
 VALUES 
-('EAM', 'SI rénové', 'EAM', 1),
-('BI', 'SI rénové', 'INF', 1),
-('MRS', 'SI rénové', 'MRS', 1),
-('GPS', 'SI rénové', 'GPS', 1),
-('GMO2', 'SI rénové', 'GM2', 1),
-('Micado 5', 'SI rénové', 'MCO', 1),
-('DOSIAP', 'SI rénové', 'DSA', 1),
-('Epsilon 2', 'SI rénové', 'EPS', 1),
-('AP913', 'SI rénové', 'AP9', 1),
+('EAM', 'SI rï¿½novï¿½', 'EAM', 1),
+('BI', 'SI rï¿½novï¿½', 'INF', 1),
+('MRS', 'SI rï¿½novï¿½', 'MRS', 1),
+('GPS', 'SI rï¿½novï¿½', 'GPS', 1),
+('GMO2', 'SI rï¿½novï¿½', 'GM2', 1),
+('Micado 5', 'SI rï¿½novï¿½', 'MCO', 1),
+('DOSIAP', 'SI rï¿½novï¿½', 'DSA', 1),
+('Epsilon 2', 'SI rï¿½novï¿½', 'EPS', 1),
+('AP913', 'SI rï¿½novï¿½', 'AP9', 1),
 ('Espace', 'SI existant', 'BLC', 1),
 ('Merlin', 'SI existant', 'MLN', 1),
 ('Cahier de Quart', 'SI existant', 'CDQ', 1),
@@ -72,7 +72,7 @@ INSERT INTO Typologie (TypologieNom, Nomcourt, Type_SIVISION)
 VALUES 
 ('Applicatif', 'Appli', 'Changement fonctionnel'),
 ('Infrastructure', 'Infra', 'Changement infrastructure'),
-('Réseau', 'Réseau', 'Changement technique'),
+('Rï¿½seau', 'Rï¿½seau', 'Changement technique'),
 ('Stockage', 'Stockage', 'Changement technique'),
 ('Flux', 'Flux', 'Changement technique')--,
 --('Divers', 'Divers', NULL);
@@ -95,22 +95,93 @@ INSERT INTO Evenement (
     Description,
     DateCreation,
     DateModification,
-    GestionInterne
+    GestionInterne,
+	CriticiteMax,
+    GUID,
+    idMessageLinked
 ) VALUES (
     '2022-06-24 20:00:00.000',                          -- DateDebut
     '2022-06-25 14:00:00.000',                          -- DateFin
     '2022-06-25 14:49:43.043',                          -- DateFermeture
     'Mise en production EAM V04.00.00 BI V08.01.00 et EASYPA V03.03.00', -- Libelle
-    '[+] Les univers BI  ne seront à jour que le dimanche 26/06 au matin.  [+] Les données pour le service RDT d''EOX seront figées du 24/06 à 20h au 25/06 05h30  [+] Données en provenance de l''EAM non rafraichies du vendredi 24/06 13h au mardi 28/06 matin    [++] Indisponiblité EAM et BI du 24/06 de 20h00 au 25/06 à 08h30  [++] Indisponiblité EASYPA du 24/06 de 20h00 au 25/06 à 09h15', -- Impact
+    '[+] Les univers BI  ne seront ï¿½ jour que le dimanche 26/06 au matin.  [+] Les donnï¿½es pour le service RDT d''EOX seront figï¿½es du 24/06 ï¿½ 20h au 25/06 05h30  [+] Donnï¿½es en provenance de l''EAM non rafraichies du vendredi 24/06 13h au mardi 28/06 matin    [++] Indisponiblitï¿½ EAM et BI du 24/06 de 20h00 au 25/06 ï¿½ 08h30  [++] Indisponiblitï¿½ EASYPA du 24/06 de 20h00 au 25/06 ï¿½ 09h15', -- Impact
     1,                                                  -- EnvID
     1,                                                  -- PorteurID
     1,                                                  -- PiloteID
     1,                                                  -- EtatID
     1,                                                  -- TypologieID
     NULL,                                               -- InstantMajID (interpreted as null from -9.22337E+18)
-    'Dans le cadre de la Mise en Production de l''application EAM V04.00.00, celle-ci est de nouveau disponible depuis le 25/06 à 05h30.    Dans le cadre de la Mise en Production de l''application EASYPA V03.03.00, celle-ci est de nouveau disponible depuis le 25/06 à 06h30.    Dans le cadre de la Mise en Production de l''application BI V08.01.00, elle-ci est de nouveau disponible depuis le 25/06 à 14h00.    La pose EAM comprend les modifications suivantes :  - Des corrections d’anomalies fonctionnelles et techniques  - Des évolutions fonctionnelles sur les processus : P002, P014, P019, P020, P021, P022, P025, P030  - Des nouveaux webservices pour easyPA et eDRT  Cette version inclura aussi un lot de paramétrage permettant :  - Arrêt des notifications des messages AAA  - Pour ceux qui ont le droit d''approbation des DT, ils pourront repasser une DT à NOUVEAU    Pour plus d’informations sur le périmètre impacté : https://edfonline.sharepoint.com/:p:/r/sites/TEAM688/Documents%20partages/General/EAM%204.0%20CDC%20V0.pptx?d=w2691f562b88a441d9718878d471ea4d8&csf=1&web=1&e=BmOhas    Durant ce créneau, les interfaces avec l’EAM ont été indisponibles.    Concernant ESPACE OPERATIONNEL : Le service RDT a été impacté. Les données ont été figées à l''heure de l''arrêt de l''EAM soit le 24/06 à 20h. Les données seront rafraichies à partir du 25/06 05h30.    Concernant le BI : Les ROP BI seront aussi indisponibles du 24 Juin à 20h00 au 25 Juin à 14h00. La nuit applicative a été désactivée le 24/06. Les univers ne seront à jour que le dimanche 26/06 au matin.    Concernant EASYPA : L''application est disponible sur sa nouvelle URL EASYPA : https://prod-sdin.edf.fr/easypa/web/ et EASYPERMIS  https://prod-sdin.edf.fr/easypa/web/search/prms     Concernant ESPADON : les données EAM ne seront pas rafraichies du vendredi 24/06 13h au mardi 28/06 matin pour les applications ESPACE OPERATIONNEL, ADREX, PLURITOOLS, OMAIRE, CAMELEON, CADOR, ORGE, ESPADON READER    ISODATA sera rechargé avec les données de production EAM du 22/06 matin. Il sera mis en lecture seule pour l’utilisateur TESTEUR via l''URL : https://prod-sdin-i3na-g506.edf.fr/as/ui/    Veuillez nous excuser pour la gêne occasionnée.', -- Description
+    'Dans le cadre de la Mise en Production de l''application EAM V04.00.00, celle-ci est de nouveau disponible depuis le 25/06 ï¿½ 05h30.    Dans le cadre de la Mise en Production de l''application EASYPA V03.03.00, celle-ci est de nouveau disponible depuis le 25/06 ï¿½ 06h30.    Dans le cadre de la Mise en Production de l''application BI V08.01.00, elle-ci est de nouveau disponible depuis le 25/06 ï¿½ 14h00.    La pose EAM comprend les modifications suivantes :  - Des corrections dï¿½anomalies fonctionnelles et techniques  - Des ï¿½volutions fonctionnelles sur les processus : P002, P014, P019, P020, P021, P022, P025, P030  - Des nouveaux webservices pour easyPA et eDRT  Cette version inclura aussi un lot de paramï¿½trage permettant :  - Arrï¿½t des notifications des messages AAA  - Pour ceux qui ont le droit d''approbation des DT, ils pourront repasser une DT ï¿½ NOUVEAU    Pour plus dï¿½informations sur le pï¿½rimï¿½tre impactï¿½ : https://edfonline.sharepoint.com/:p:/r/sites/TEAM688/Documents%20partages/General/EAM%204.0%20CDC%20V0.pptx?d=w2691f562b88a441d9718878d471ea4d8&csf=1&web=1&e=BmOhas    Durant ce crï¿½neau, les interfaces avec lï¿½EAM ont ï¿½tï¿½ indisponibles.    Concernant ESPACE OPERATIONNEL : Le service RDT a ï¿½tï¿½ impactï¿½. Les donnï¿½es ont ï¿½tï¿½ figï¿½es ï¿½ l''heure de l''arrï¿½t de l''EAM soit le 24/06 ï¿½ 20h. Les donnï¿½es seront rafraichies ï¿½ partir du 25/06 05h30.    Concernant le BI : Les ROP BI seront aussi indisponibles du 24 Juin ï¿½ 20h00 au 25 Juin ï¿½ 14h00. La nuit applicative a ï¿½tï¿½ dï¿½sactivï¿½e le 24/06. Les univers ne seront ï¿½ jour que le dimanche 26/06 au matin.    Concernant EASYPA : L''application est disponible sur sa nouvelle URL EASYPA : https://prod-sdin.edf.fr/easypa/web/ et EASYPERMIS  https://prod-sdin.edf.fr/easypa/web/search/prms     Concernant ESPADON : les donnï¿½es EAM ne seront pas rafraichies du vendredi 24/06 13h au mardi 28/06 matin pour les applications ESPACE OPERATIONNEL, ADREX, PLURITOOLS, OMAIRE, CAMELEON, CADOR, ORGE, ESPADON READER    ISODATA sera rechargï¿½ avec les donnï¿½es de production EAM du 22/06 matin. Il sera mis en lecture seule pour lï¿½utilisateur TESTEUR via l''URL : https://prod-sdin-i3na-g506.edf.fr/as/ui/    Veuillez nous excuser pour la gï¿½ne occasionnï¿½e.', -- Description
     '2022-06-17 14:34:53.537',                          -- DateCreation
     '2022-06-25 14:51:28.180',                          -- DateModification
-    0                                                   -- GestionInterne
-);
+    0,                                                   -- GestionInterne
+    0,
+    'AC3651C9-D97A-4951-AEE1-87FD6DA448AD',
+    'AC3651C9-D97A-4951-AEE1-87FD6DA448AD'
+),
+(
+    '2024-11-30 09:40:00.000',
+    '2024-11-30 17:35:00.000',
+    NULL,
+    'Arrï¿½t/Relance de l''application',
+    '[+] test J-1 29/11 17h00',
+    1,                                                  -- EnvID
+    1,                                                  -- PorteurID
+    1,                                                  -- PiloteID
+    1,                                                  -- EtatID
+    1,                                                  -- TypologieID
+    NULL,                                               -- InstantMajID (interpreted as null from -9.22337E+18)
+    'test J-1 29/11 17h00 Achille avec impact [+] test J-1 29/11 17h00',
+    '2024-11-28 14:28:53.597',
+    '2024-11-29 09:36:08.327',
+    0,
+     1,
+    'AC3651C9-D97A-4951-AEE1-87FD6DA448AD',
+    'AC3651C9-D97A-4951-AEE1-87FD6DA448AD'
+),
+(
+    '2023-06-20 15:30:00.000',
+    '2023-06-21 02:30:00.000',
+    '2023-10-12 07:54:08.590',
+    'Opï¿½ration de maintenance',
+    'Aucun impact',
+    1,                                                  -- EnvID
+    1,                                                  -- PorteurID
+    1,                                                  -- PiloteID
+    1,                                                  -- EtatID
+    1,                                                  -- TypologieID
+   NULL,
+    'TEST',
+    '2023-06-19 15:28:48.573',
+    '2024-11-29 09:12:40.170',
+    0,
+     2,
+    'AC3651C9-D97A-4951-AEE1-87FD6DA448AD',
+    'AC3651C9-D97A-4951-AEE1-87FD6DA448AD'
+),
+(
+    '2023-06-20 15:30:00.000',
+    '2023-06-21 02:30:00.000',
+    '2023-10-12 07:54:08.590',
+    'Opï¿½ration de maintenance',
+    'Aucun impact',
+    1,                                                  -- EnvID
+    1,                                                  -- PorteurID
+    1,                                                  -- PiloteID
+    1,                                                  -- EtatID
+    1,                                                  -- TypologieID
+   NULL,
+    'TEST',
+    '2023-06-19 15:28:48.573',
+    '2024-11-29 09:12:40.170',
+    0,
+     3,
+    'AC3651C9-D97A-4951-AEE1-87FD6DA448AD',
+    'AC3651C9-D97A-4951-AEE1-87FD6DA448AD'
+)
 GO
+   
+
+
+
+--select * from Evenement

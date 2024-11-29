@@ -31,7 +31,10 @@ BEGIN
         e.InstantMajID,
         e.TypologieID,                           -- 18: Typologie ID (Nullable)
         t.TypologieNom AS Typologie,             -- 19: Typologie Name (Nullable)
-        e.GestionInterne                         -- 20: Gestion Interne (Nullable)
+        e.GestionInterne,                         -- 20: Gestion Interne (Nullable)
+        e.CriticiteMax,
+        e.GUID,
+        e.idMessageLinked
     FROM 
         Evenement e
     LEFT JOIN 

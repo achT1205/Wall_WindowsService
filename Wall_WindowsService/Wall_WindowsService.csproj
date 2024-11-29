@@ -86,10 +86,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="App_dev.config" />
+    <None Include="App_local.config" />
     <None Include="Deploy\Install.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Deploy\local\Install.ps1" />
+    <None Include="Deploy\local\Uninstall.ps1" />
     <None Include="Deploy\Uninstall.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
